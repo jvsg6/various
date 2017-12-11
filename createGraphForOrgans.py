@@ -37,8 +37,8 @@ name_redMarrow =["Красный костный мозг (облако, пове
 		["f142", "f143", "f149"], ["f149"],  "Эквивалентная доза за 10 сут",
 		["f30","f31","f37"],    ["f37"],   "ОБЭ - взвешенная доза за 30 сут",
 		["f78","f79","f85"], ["f85"],  "Ожидаемая эквивалентная доза за 2 сут",
-		 "2.0", "Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития пневмонии",
-		 "Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития пневмонии 2 Гр-экв",
+		 "2.0", "Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития синдрома поражения кроветворения",
+		 "Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития синдрома поражения кроветворения 2 Гр-экв",
 		 "redMarrow_full", "redMarrow_inh", "0.2"]
 
 #print name_thyroid
@@ -415,7 +415,281 @@ def organ(string, name, lst):
 		save("{}_{}_new".format(lst[15], name))
 		print "{}_{}_new".format(lst[15], name)
 	return
+def thyroid(string, name):
+	global points , pointsValue
+	x=axeRadius
+	maxArr=np.array([])
+	points = readAxis('/home/egor/work/pictGraph/Axis/maxPoint_f1_95.dat')
+	lines=[]
+	fig = plt.figure(figsize=(10, 6)) #figsize(horiz, vert)
+	gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) 
+	ax = plt.subplot(gs[0])
+	#Разбиение на 2 оси и 2 подписи
+	ax.set_ylabel(u'Зв')
+	ax2 = ax.twinx()
+	ax2.set_ylabel(u'Гр-экв', labelpad=30)
+	ax2.tick_params(axis='y', which='major', 
+               labelleft='off', labelright='off', 
+               left=False, right=False)
+	ax.tick_params(axis='y', which='major', 
+	labelleft='on', labelright='on', 
+               left=True, right=True)
+	#Конец 
+	if string=="full":
+		ax.set_title(u'Щитовидная железа (облако, поверхность, ингаляция)')
+	else:
+		ax.set_title(u'Щитовидная железа (ингаляция)')
+	ax.set_xlabel(u'x (km)')
+	
+	ax_leg = fig.add_subplot(gs[1])
+	
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f166","f167","f173") #"f166","f167","f173"
+		npPoints=np.array(pointsValue)
+		maxArr=np.append(maxArr, npPoints.max())
+		lab1="Эквивалентная доза за 10 сут"
+		a,= ax.plot(x, pointsValue[0:40], label=lab1.decode('utf-8'))
+		lines.append(a)
+	else:
+		pointsValue=sumGridForDoseNew("f173")
 
+	
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f46","f47","f53")
+	else:
+		pointsValue=sumGridForDoseNew("f53")
+	npPoints=np.array(pointsValue)
+	maxArr=np.append(maxArr, npPoints.max())
+	lab2="ОБЭ - взвешенная доза за 30 сут"
+	b,= ax.plot(x, pointsValue[0:40], label=lab2.decode('utf-8'))
+	lines.append(b)
+	
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f102","f103","f109")
+	else:
+		pointsValue=sumGridForDoseNew("f109")
+	npPoints=np.array(pointsValue)
+	maxArr=np.append(maxArr, npPoints.max())
+	lab2="Ожидаемая эквивалентная доза за 2 сут"
+	c, = ax.plot(x, pointsValue[0:40], label=lab2.decode('utf-8'))
+	lines.append(c)
+	maxPoint=maxArr.max()
+	if maxPoint>=2.0:
+		eff = np.array([2.0]*len(x))
+		lab2="Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития гипотиреоза (2 Гр-экв)"
+		d, = ax.plot(x, eff,  label=lab2.decode('utf-8'))
+		lines.append(d)
+		#ax.text(20.0, 3.0, u'Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития гипотиреоза', fontsize=8)
+	else:
+		eff = np.array([maxPoint+0.2]*len(x))
+		lab2="Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития гипотиреоза (2 Гр-экв)"
+		d, = ax.plot(x, eff, color='white', label=lab2.decode('utf-8'))
+		lines.append(d)
+		
+		#ax.text(20.0, maxPoint/2.0 , u'Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития гипотиреоза 2 Гр-экв', fontsize=8)
+	
+	ax.grid(False, color='black', linestyle='-', linewidth=0.2)
+	for line in lines:  # just to make the legend plot
+		ax_leg.plot([], [], line.get_color(), label=line.get_label())
+	ax_leg.legend(loc='upper left', ncol=1, fontsize=9) 
+	ax_leg.axis('off')
+	if string=="full":
+		save("thyroid_full_{}".format(name))
+		print "thyroid_full_{}".format(name)
+	else:
+		save("thyroid_inh_{}".format(name))
+		print "thyroid_inh_{}".format(name)
+	return
+def redMarrow(string, name):
+	global points , pointsValue
+	x=axeRadius
+	maxArr=np.array([])
+	points = readAxis('/home/egor/work/pictGraph/Axis/maxPoint_f1_95.dat')
+	#pointsValue=sumGridForDoseNew("f204")
+	#prepToSave("f204")
+	#pointsValue=sumGridForDoseNew("f205")
+	#prepToSave("f205")
+		#box = ax.get_position()
+	#ax.set_position([box.x0, box.y0 + box.height * 0.1,
+	#box.width, box.height * 0.9])
+	
+	
+	#ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=5)
+	#lab1.decode('utf-8'),lab2.decode('utf-8')
+	lines=[]
+	fig = plt.figure(figsize=(10, 6)) #figsize(horiz, vert)
+	gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) 
+	ax = plt.subplot(gs[0])
+	#Разбиение на 2 оси и 2 подписи
+	ax.set_ylabel(u'Зв')
+	ax2 = ax.twinx()
+	ax2.set_ylabel(u'Гр-экв', labelpad=30)
+	ax2.tick_params(axis='y', which='major', 
+               labelleft='off', labelright='off', 
+               left=False, right=False)
+	ax.tick_params(axis='y', which='major', 
+	labelleft='on', labelright='on', 
+               left=True, right=True)
+	#Конец 
+	#plt.title(u'fewfewfw')
+	ax.set_xlabel(u'x (km)')
+	if string=="full":
+		ax.set_title(u'Красный костный мозг (облако, поверхность, ингаляция)')
+	else:
+		ax.set_title(u'Красный костный мозг (ингаляция)')
+	#ax.set_title('axes title')
+	ax_leg = fig.add_subplot(gs[1])
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f142", "f143", "f149") #"f150","f151","f157"
+		npPoints=np.array(pointsValue)
+		maxArr=np.append(maxArr, npPoints.max())
+		lab1="Эквивалентная доза за 10 сут"
+		a,= ax.plot(x, pointsValue[0:40], label=lab1.decode('utf-8'))
+		lines.append(a)
+	else:
+		pointsValue=sumGridForDoseNew("f149")
+
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f30","f31","f37") #"f38","f39","f45"
+	else:
+		pointsValue=sumGridForDoseNew("f37")
+	npPoints=np.array(pointsValue)
+	maxArr=np.append(maxArr, npPoints.max())
+	lab2="ОБЭ - взвешенная доза за 30 сут"
+	b,= ax.plot(x, pointsValue[0:40], label=lab2.decode('utf-8'))
+	lines.append(b)
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f78","f79","f85") #"f86","f87","f93"
+	else:
+		pointsValue=sumGridForDoseNew("f85")
+	npPoints=np.array(pointsValue)
+	maxArr=np.append(maxArr, npPoints.max())
+	lab2="Ожидаемая эквивалентная доза за 2 сут"
+	c, = ax.plot(x, pointsValue[0:40], label=lab2.decode('utf-8'))
+	lines.append(c)
+	
+	maxPoint=maxArr.max()
+	if maxPoint>=2.0:
+		eff = np.array([2.0]*len(x))
+		lab2="Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития синдрома поражения кроветворения (2 Гр-экв)"
+		d, = ax.plot(x, eff, label=lab2.decode('utf-8'))
+		lines.append(d)
+		#ax.text(10.0, 3.0, u'Дозовый предел МАГАТЭ для вмешательства \nс целью недопущения развития синдрома поражения кроветворения', fontsize=8)
+		
+	else:
+		eff = np.array([maxPoint+0.2]*len(x))
+		lab2="Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития синдрома поражения кроветворения (2 Гр-экв)"
+		d, = ax.plot(x, eff, color='white', label=lab2.decode('utf-8'))
+		lines.append(d)
+		
+		#ax.text(10.0, maxPoint/2.0, u'Дозовый предел МАГАТЭ для вмешательства с целью недопущения \nразвития синдрома поражения кроветворения 2 Гр-экв', fontsize=8)
+	ax.grid(False, color='black', linestyle='-', linewidth=0.2)
+
+	for line in lines:  # just to make the legend plot
+		ax_leg.plot([], [], line.get_color(), label=line.get_label())
+	ax_leg.legend(loc='upper left', ncol=1, fontsize=9) 
+	ax_leg.axis('off')
+	if string=="full":
+		save("redMarrow_full_{}".format(name))
+		print "redMarrow_full_{}".format(name)
+	else:
+		save("redMarrow_inh_{}".format(name))
+		print "redMarrow_inh_{}".format(name)
+	return
+def lungs(string, name):
+	global points , pointsValue
+	x=axeRadius
+	points = readAxis('/home/egor/quest/TIC_graph/Axis/maxPoint_f1_95.dat')
+	#pointsValue=sumGridForDoseNew("f204")
+	#prepToSave("f204")
+	#pointsValue=sumGridForDoseNew("f205")
+	#prepToSave("f205")
+		#box = ax.get_position()
+	#ax.set_position([box.x0, box.y0 + box.height * 0.1,
+	#box.width, box.height * 0.9])
+	maxArr=np.array([])
+	
+	#ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=5)
+	#lab1.decode('utf-8'),lab2.decode('utf-8')
+	lines=[]
+	fig = plt.figure(figsize=(10, 6)) #figsize(horiz, vert)
+	gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) 
+	ax = plt.subplot(gs[0])
+	#Разбиение на 2 оси и 2 подписи
+	ax.set_ylabel(u'Зв')
+	ax2 = ax.twinx()
+	ax2.set_ylabel(u'Гр-экв', labelpad=30)
+	ax2.tick_params(axis='y', which='major', 
+               labelleft='off', labelright='off', 
+               left=False, right=False)
+	ax.tick_params(axis='y', which='major', 
+	labelleft='on', labelright='on', 
+               left=True, right=True)
+	#Конец 
+	#plt.title(u'fewfewfw')
+	ax.set_xlabel(u'x (km)')
+	if string=="full":
+		ax.set_title(u'Легкие (облако, поверхность, ингаляция)')
+	else:
+		ax.set_title(u'Легкие (ингаляция)')
+	#ax.set_title('axes title')
+	ax_leg = fig.add_subplot(gs[1])
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f150","f151","f157") #"f150","f151","f157"
+		npPoints=np.array(pointsValue)
+		maxArr=np.append(maxArr, npPoints.max())
+		lab1="Эквивалентная доза за 10 сут"
+		a,= ax.plot(x, pointsValue[0:40], label=lab1.decode('utf-8'))
+		lines.append(a)
+		
+	else:
+		pointsValue=sumGridForDoseNew("f157")
+
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f38","f39","f45") #"f38","f39","f45"
+	else:
+		pointsValue=sumGridForDoseNew("f45")
+	npPoints=np.array(pointsValue)
+	maxArr=np.append(maxArr, npPoints.max())
+	lab2="ОБЭ - взвешенная доза за 30 сут"
+	b,= ax.plot(x, pointsValue[0:40], label=lab2.decode('utf-8'))
+	lines.append(b)
+	if string=="full":
+		pointsValue=sumGridForDoseNew("f86","f87","f93") #"f86","f87","f93"
+	else:
+		pointsValue=sumGridForDoseNew("f93")
+	npPoints=np.array(pointsValue)
+	maxArr=np.append(maxArr, npPoints.max())
+	maxPoint=maxArr.max()
+	lab2="Ожидаемая эквивалентная доза за 2 сут"
+	c, = ax.plot(x, pointsValue[0:40], label=lab2.decode('utf-8'))
+	lines.append(c)
+	if maxPoint>=30.0:
+		eff = np.array([30.0]*len(x))
+		lab2="Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития пневмонии (30 Гр-экв)"
+		d, = ax.plot(x, eff, label=lab2.decode('utf-8'))
+		lines.append(d)
+		#ax.text(10.0, 31.0, u'Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития пневмонии', fontsize=8)
+	else:
+		eff = np.array([maxPoint+0.2]*len(x))
+		lab2="Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития пневмонии (30 Гр-экв)"
+		d, = ax.plot(x, eff,color='white', label=lab2.decode('utf-8'))
+		lines.append(d)
+		#ax.text(10.0,maxPoint/2.0 , u'Дозовый предел МАГАТЭ для вмешательства с целью недопущения развития пневмонии равен 30 Гр-экв', fontsize=8)
+	ax.grid(False, color='black', linestyle='-', linewidth=0.2)
+	
+
+	for line in lines:  # just to make the legend plot
+		ax_leg.plot([], [], line.get_color(), label=line.get_label())
+	ax_leg.legend(loc='upper left', ncol=1, fontsize=9) 
+	ax_leg.axis('off')
+	if string=="full":
+		save("lungs_full_{}".format(name))
+		print "lungs_full_{}".format(name)
+	else:
+		save("lungs_inh_{}".format(name))
+		print "lungs_inh_{}".format(name)
+	return
 def main():
 	global pathToSIdir, name_thyroid
 	k=pathToSIdir
