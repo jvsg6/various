@@ -1,9 +1,10 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #Модуль для сравнения крит групп Ищет крит группу в каждом органе по всем точкам карты, ругается,
-#если крит группа не одна на карте
+#если крит группа не одна на карте.
 import sys
 import os
+from math import cos,sin,radians,sqrt,fabs,acos,pi,degrees,floor,log10
 import matplotlib as mpl
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
@@ -287,6 +288,7 @@ def printASCIIGRDFile(filename,countx, county, lonmin, lonmax, latmin, latmax, c
 def main():
 	mypath=os.path.dirname(os.path.realpath( __file__ ))
 	os.chdir(mypath)
+	old_settings = np.seterr(all='print')
 	print sys.argv[1]
 	if os.path.isdir("./critGroup_new/"+sys.argv[1].split('/')[7].split(' ')[0]+"/")==False:
 		os.makedirs("./critGroup_new/"+sys.argv[1].split('/')[7].split(' ')[0]+"/")
@@ -317,45 +319,64 @@ def main():
 		#latmin=lst[0].latmin
 		#latmax=lst[0].latmax
 	bb=True
-	zero=np.array([0.0,0.0,0.0,0.0,0.0,0.0])
+	zero=np.array([0.0,0.0,0.0,0.0,0.0])
 	for j in range(24, 197, 8):
+		#print j
 		critArray=[]
 		lst=[]
 		now=0
 		allcrit=0
 		a=True
 		b=True
-		array=np.array([0.0,0.0,0.0,0.0,0.0,0.0])
-		for i in range(j, j+6):
+		array=np.array([0.0,0.0,0.0,0.0,0.0])
+		for i in range(j, j+5):
 			#print i		
 			lst.append(GeoGrid(listOfGrid[i]))
-			m=GeoGrid(listOfGrid[i])
+			#m=GeoGrid(listOfGrid[i])
+		#print i, i, i, i, i
 		#print "///////////////////////////"
 		for k in range(len(lst[0].data)):
 			#print i
-			array=np.array([lst[0].data[k], lst[1].data[k],lst[2].data[k],lst[3].data[k], lst[4].data[k], lst[5].data[k]])
+			array=np.array([])
+			array=np.array([lst[0].data[k], lst[1].data[k],lst[2].data[k],lst[3].data[k], lst[4].data[k]])#, lst[5].data[k]])
+			if a==True:
+				maxar=np.array(lst[0].data)
+				maxp=np.argmax(maxar)#Номер точки с макс значением
+				
+				print maxar, maxp, i
+				array_max=np.array([lst[0].data[maxp], lst[1].data[maxp],lst[2].data[maxp],lst[3].data[maxp], lst[4].data[maxp]])
+				allcrit=np.argmax(array_max)+1
+				print allcrit
+				#print allcrit
+				a=False
+			#print len(array), array
 			#print np.argmax(array)+1
 			if np.array_equal(array, zero):
 				critArray.append(1.70141e+38)
 			else:
 				critArray.append(np.argmax(array)+1)
 				now=np.argmax(array)+1
-				if a==True:
-					allcrit=np.argmax(array)+1
-					#print allcrit
-					a=False
-			if b==True :
+
+			if (j==j)and(np.array_equal(array, zero)==False): #or True) and (np.array_equal(array, zero)==False)(b==True):
 				if allcrit!=now:
-					print "WoW"
-					print array 
-					for i in range(j, j+6):
-					
-						print "/home/egor/quest/criticalGroup/GRD/f{}.grd".format(i)
+					#print "kek"
+					delta=fabs(array[now-1]-array[allcrit-1])
+					#print delta, delta/array[allcrit-1]*100.0
+					#print delta/array[allcrit-1]*100.0
+					#print "Try"+"   "+str(j)+"   "+str(j+4), k
+					if (delta/array[allcrit-1]*100.0)>=10.0:
+						print "\n"
+						print "WoW"+"   "+str(j)+"   "+str(j+4), k
+						print "old crit num "+str(allcrit)+" val "+str(array[allcrit-1])+"  new crit  num "+str(now)+" val "+str(array[now-1])
+						print "delta   "+str(delta)+" % "+str(delta/array[allcrit-1]*100.0)
+						#print array
+						
+						
 						
 					b=False
 		if bb==False:	
 			fig = plt.figure()
-			plt.imshow(m.matrix, interpolation='none') # метод псевдографики pcolor
+			plt.imshow(m.matrix, interpolation='none')
 			ar=np.array(critArray).reshape(101, 101)
 			ar=ar.transpose()
 			ar[::][::1]=ar[::][::-1]
@@ -364,7 +385,8 @@ def main():
 			plt.show()
 			
 		printASCIIGRDFile("crit{}.grd".format(str(j)),lst[0].countx, lst[0].county, lst[0].lonmin, lst[0].lonmax, lst[0].latmin, lst[0].latmax,critArray , allcrit)
-		
+		#if j== 32:
+			#break
 	
 	#group1=rg("/home/egor/quest/criticalGroup/GRD/f{}.grd".format(i))
 	#print grid1.data
