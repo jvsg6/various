@@ -343,10 +343,10 @@ def main():
 				maxar=np.array(lst[0].data)
 				maxp=np.argmax(maxar)#Номер точки с макс значением
 				
-				print maxar, maxp, i
+				#print maxar, maxp, i
 				array_max=np.array([lst[0].data[maxp], lst[1].data[maxp],lst[2].data[maxp],lst[3].data[maxp], lst[4].data[maxp]])
 				allcrit=np.argmax(array_max)+1
-				print allcrit
+				#print allcrit
 				#print allcrit
 				a=False
 			#print len(array), array
@@ -370,6 +370,9 @@ def main():
 						print "old crit num "+str(allcrit)+" val "+str(array[allcrit-1])+"  new crit  num "+str(now)+" val "+str(array[now-1])
 						print "delta   "+str(delta)+" % "+str(delta/array[allcrit-1]*100.0)
 						#print array
+					#else:
+						#print "Zamena  "+"   "+str(j)+"   "+str(j+4)+"   "+ str(k)+"  ///////////////////////////////////////////////////"
+						#critArray[len(critArray)-1]=allcrit
 						
 						
 						
